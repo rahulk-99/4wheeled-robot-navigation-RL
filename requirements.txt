@@ -1,0 +1,8 @@
+torch>=2.0.0
+gymnasium>=0.29.0
+numpy>=1.24.0
+mcap>=1.0.0
+rclpy
+visualization-msgs
+tensorboard>=2.14.0
+stable-baselines3>=2.0.0
