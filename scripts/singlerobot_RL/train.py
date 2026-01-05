@@ -109,7 +109,7 @@ if __name__ == "__main__":
     print(f"Run: 'tensorboard --logdir={log_dir}' to view charts")
     
     # Setup visualization
-    mcap_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../outputs/recordings/training_run_sb3.mcap"))
+    mcap_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../outputs/recordings/training_run_sb3.mcap"))
     viz = McapVisualizer(mcap_path)
     print(f"Recording training visualization to: {mcap_path}")
     

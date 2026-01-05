@@ -147,7 +147,7 @@ if __name__ == "__main__":
     print("Training started with TensorBoard logging...")
     print("Run: 'tensorboard --logdir=runs' to view charts")
 
-    mcap_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../outputs/recordings/training_run_custom.mcap"))
+    mcap_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../outputs/recordings/training_run_custom.mcap"))
     viz = McapVisualizer(mcap_path)
     print(f"Recording training visualization to: {mcap_path}")
 
@@ -217,7 +217,7 @@ if __name__ == "__main__":
         viz.close()
         
         # Save trained model
-        model_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../outputs/models/trained_policy_custom.pth"))
+        model_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../outputs/models/trained_policy_custom.pth"))
         torch.save(agent.policy.state_dict(), model_path)
         print(f"Model saved to: {model_path}")
         print("Training Complete (or Interrupted).")

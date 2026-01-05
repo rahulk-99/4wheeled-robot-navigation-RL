@@ -81,10 +81,10 @@ Train a single robot to reach a randomized target.
 
 **Train:**
 ```bash
-python3 scripts/singlerobot_RL/train.py [--cpu] [--timesteps 500000]
+python3 scripts/singlerobot_RL/train.py --cpu --timesteps 500000
 ```
 
-**Options:**
+**Optional:**
 - `--cpu`: Force CPU-only training (by default, GPU is used if available)
 - `--timesteps`: Number of training steps (default: 500000)
 
@@ -137,10 +137,10 @@ Train an agent to navigate while avoiding two other dynamic robots that cross it
 
 **Train:**
 ```bash
-python3 scripts/multirobot_RL/train.py [--cpu] [--timesteps 500000]
+python3 scripts/multirobot_RL/train.py --cpu --timesteps 500000
 ```
 
-**Options:**
+**Optional:**
 - `--cpu`: Force CPU-only training (by default, GPU is used if available)
 - `--timesteps`: Number of training steps (default: 500000)
 
@@ -206,7 +206,7 @@ A custom implementation of PPO (Proximal Policy Optimization) from scratch was d
 
 **Train:**
 ```bash
-python3 scripts/custom_ppo_singlerobot/train_custom.py [--cpu]
+python3 scripts/custom_ppo_singlerobot/train_custom.py --cpu
 ```
 
 **Options:**
@@ -215,7 +215,7 @@ python3 scripts/custom_ppo_singlerobot/train_custom.py [--cpu]
 
 **Play/Inference:**
 ```bash
-python3 scripts/custom_ppo_singlerobot/play_custom.py --model outputs/models/trained_policy.pth --episodes 3
+python3 scripts/custom_ppo_singlerobot/play_custom.py --model outputs/models/trained_policy_custom.pth --episodes 3
 ```
 
 **Results:**
