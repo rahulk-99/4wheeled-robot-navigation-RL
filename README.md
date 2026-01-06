@@ -1,4 +1,4 @@
-# 4-Wheel Robot PPO Training
+# 4-Wheel Steering Robot Autonomous Navigation Using RL
 
 Reinforcement learning project for training a 4-wheel steering robot to navigate  and reach a random target autonomously using PPO (Proximal Policy Optimization). The robot learns smooth, efficient navigation with two training scenarios:
 
@@ -178,7 +178,7 @@ tensorboard --logdir outputs/logs --port 6006
 ```
 Then open your browser to `http://localhost:6006` to visualize all training curves and metrics from both single-robot and multi-robot environments.
 
-## Implementation Details
+## RL Implementation Details
 
 ### Observation and Action Spaces
 
