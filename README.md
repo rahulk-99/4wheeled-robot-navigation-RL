@@ -7,6 +7,18 @@ Reinforcement learning project for training a 4-wheel steering robot to navigate
 
 Built with Stable-Baselines3, Gymnasium, and ROS 2 integration for mcap visualization. This project also includes a successfull [custom PPO implementation](#custom-ppo-implementation) from scratch for deeper RL insights.
 
+## Table of Contents
+
+- [Demo](#demo)
+- [Project Structure](#project-structure)
+- [Setup](#setup)
+- [Usage](#usage)
+  - [Single Robot Navigation](#single-robot-navigation)
+  - [Multi-Robot Collision Avoidance](#multi-robot-collision-avoidance)
+- [Monitoring Training](#monitoring-training)
+- [RL Implementation Details](#rl-implementation-details)
+- [Custom PPO Implementation](#custom-ppo-implementation)
+
 ### Demo
 
 <div align="center">
@@ -216,6 +228,22 @@ The reward function is balanced to encourage smooth, efficient driving:
     *   **Robot 1 (red)**: RL Agent.
     *   **Robot 2 & 3 (green)**: scripted "smart" obstacles that avoid collisions.
 
+### Kinematics Model
+
+**Robot Dimensions:**
+- **Half-length (L)**: 0.5m (distance from center to front/rear axle)
+- **Half-width (W)**: 0.3m (distance from center to left/right wheels)
+- **Wheel radius**: 0.1m
+- **Robot footprint**: ~1.0m × 0.6m
+
+**Physical Constraints & Rate Limits:**
+- **Steering Rate Limit**: 2.0 rad/s
+  - Wheels cannot change steering angle instantaneously
+  - Time required to reach target angle: `max_delta = 2.0 × dt`
+  
+- **Wheel Acceleration Limit**: 5.0 rad/s²
+  - Wheels cannot spin up/down instantly
+  - Gradual acceleration of wheel spin speed: `max_dw = 5.0 × dt`
 
 ## Custom PPO Implementation
 
