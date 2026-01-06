@@ -29,3 +29,7 @@ Thumbs.db
 .ipynb_checkpoints/
 *.ipynb
 
+
+# MCAP files
+*.mcap
+outputs/recordings/*.mcap

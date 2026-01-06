@@ -1,6 +1,6 @@
 # 4-Wheel Steering Robot Autonomous Navigation Using RL
 
-Reinforcement learning project for training a 4-wheel steering robot to navigate  and reach a random target autonomously using PPO (Proximal Policy Optimization). The robot learns smooth, efficient navigation with two training scenarios:
+Reinforcement learning project for training a 4-wheel steering robot to navigate and reach a random target autonomously using PPO (Proximal Policy Optimization). The policy is trained entirely **from scratch** (no pre-trained models used). The robot learns smooth, efficient navigation with two training scenarios:
 
 - **Single Robot Navigation**: Navigate to randomly spawned targets
 - **Multi-Robot Collision Avoidance**: One agent (red) learns collision avoidance using RL by observing two robots (green) controlled by predefined P-controller policies
@@ -31,8 +31,8 @@ Built with Stable-Baselines3, Gymnasium, and ROS 2 integration for mcap visualiz
       <td align="center"><strong>Multi-Robot Collision Avoidance</strong></td>
     </tr>
     <tr>
-      <td><img src="docs/single_robot.gif" width="400" alt="Single Robot Navigation"></td>
-      <td><img src="docs/multi_robot.gif" width="400" alt="Multi-Robot Collision Avoidance"></td>
+      <td><img src="docs/singlerobot_inference.gif" width="400" alt="Single Robot Navigation"></td>
+      <td><img src="docs/multirobot_inference.gif" width="400" alt="Multi-Robot Collision Avoidance"></td>
     </tr>
   </table>
 </div>
@@ -103,6 +103,10 @@ python3 scripts/singlerobot_RL/train.py --cpu --timesteps 500000
 - `--cpu`: Force CPU-only training (by default, GPU is used if available)
 - `--timesteps`: Number of training steps (default: 500000)
 
+**Training Visualization:**
+![Single Robot Training Animation](docs/singlerobot_train.gif)
+
+
 **Training Curves:**
 ![Single Robot Training Curves](docs/training_curves_single_robot.png)
 
@@ -119,30 +123,7 @@ This command runs inference on the trained policy. Each episode:
 
 The recorded episodes are saved to `outputs/recordings/policy_run_sb3.mcap` for visualization.
 
-**Visualization Recorded mcap in RViz:**
 
-1. **Play the recorded MCAP file after inference:**
-```bash
-source /opt/ros/<distro>/setup.bash
-ros2 bag play outputs/recordings/policy_run_sb3.mcap -s mcap
-```
-
-2. **Launch RViz2 in another terminal:**
-```bash
-source /opt/ros/<distro>/setup.bash
-rviz2
-```
-
-3. **Configure RViz:**
-   - Add a **MarkerArray** visualization
-   - Select the '/visualization' topic to visualize the recorded robot trajectory
-
-**Visualize Training Process Recorded in mcap:**
-To visualize the entire training process recorded every 200th episode:
-```bash
-source /opt/ros/<distro>/setup.bash
-ros2 bag play outputs/recordings/training_run_sb3.mcap -s mcap
-```
 
 ### Multi-Robot Collision Avoidance
 
@@ -159,8 +140,12 @@ python3 scripts/multirobot_RL/train.py --cpu --timesteps 500000
 - `--cpu`: Force CPU-only training (by default, GPU is used if available)
 - `--timesteps`: Number of training steps (default: 500000)
 
+**Training Visualization:**
+![Multi-Robot Training Animation](docs/multirobot_train.gif)
+
 **Training Curves:**
 ![Multi-Robot Training Curves](docs/training_curves_multirobot.png)
+
 
 *To monitor these curves and other training parameters, refer to [TensorBoard](#monitoring-training) logs.*
 
@@ -169,19 +154,43 @@ python3 scripts/multirobot_RL/train.py --cpu --timesteps 500000
 python3 scripts/multirobot_RL/play.py --model outputs/models/trained_policy_multi_sb3.zip --episodes 3
 ```
 
-**Visualization Recorded mcap in RViz:**
 
-1. **Play the recorded MCAP file after inference:**
+
+## Visualization
+
+Recorded `.mcap` files can be visualized using **Foxglove Studio** or **RViz2**.
+
+**Option 1: Foxglove Studio**
+1.  Open [Foxglove Studio](https://foxglove.dev/).
+2.  Drag and drop/ or open the `.mcap` file into the window.
+3.  Add a **3D Panel**.
+4.  In settings:
+    *   Set **Fixed Frame** to `map`.
+    *   Enable topics: `/visualization`, `/tf`, `/robot1/odom`.
+
+**Option 2: RViz2**
+1.  **Play the recorded MCAP file:**
 ```bash
 source /opt/ros/<distro>/setup.bash
-ros2 bag play outputs/recordings/policy_run_multi_sb3.mcap -s mcap
+ros2 bag play outputs/recordings/policy_run_sb3.mcap -s mcap   # Replace file name as needed
 ```
 
-3. **Visualize Training Process Recorded in mcap:**
-To visualize the entire training process recorded every 200th episode:
+2.  **Launch RViz2 in another terminal:**
 ```bash
 source /opt/ros/<distro>/setup.bash
-ros2 bag play outputs/recordings/training_run_multi_sb3.mcap -s mcap
+rviz2
+```
+
+3.  **Configure RViz:**
+    *   Set Fixed Frame to `map`.
+    *   Add **MarkerArray** display (Topic: `/visualization`).
+    *   Add **TF** display.
+
+**Visualize Training Process:**
+Both single and multi-robot training scripts now record **every episode** to an MCAP file.
+```bash
+# Foxglove: Drag and drop outputs/recordings/training_run_sb3.mcap
+# RViz: ros2 bag play outputs/recordings/training_run_sb3.mcap -s mcap
 ```
 
 ## Monitoring Training

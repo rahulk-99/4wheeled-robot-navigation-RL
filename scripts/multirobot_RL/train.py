@@ -120,7 +120,7 @@ if __name__ == "__main__":
     print(f"Recording training visualization to: {mcap_path}")
     
     # Create callbacks
-    viz_callback = MultiRobotVisualizationCallback(viz, env, record_freq=200)
+    viz_callback = MultiRobotVisualizationCallback(viz, env, record_freq=1)
     reward_callback = EpisodeRewardCallback(print_freq=100)
     
     try:
