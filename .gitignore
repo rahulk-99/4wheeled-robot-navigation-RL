@@ -29,5 +29,3 @@ Thumbs.db
 .ipynb_checkpoints/
 *.ipynb
 
-# TensorBoard events
-events.out.tfevents.*

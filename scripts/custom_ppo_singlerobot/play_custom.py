@@ -9,8 +9,9 @@ sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../..'))
 from src.robot_gym import FourWheelRobotEnv
 from src.vis_mcap import McapVisualizer
 
-# Import ActorCritic from train script 
-from .train_custom import ActorCritic
+# Add current directory to path to import train_custom
+sys.path.insert(0, os.path.dirname(__file__))
+from train_custom import ActorCritic
 
 def play_policy(model_path, output_file="../outputs/recordings/policy_run_custom.mcap", num_episodes=3, force_cpu=False):
     """

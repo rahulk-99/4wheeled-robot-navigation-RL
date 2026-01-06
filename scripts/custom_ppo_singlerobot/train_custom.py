@@ -73,7 +73,7 @@ class PPOAgent:
         self.data = []
         
         # TensorBoard Writer
-        log_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../outputs/logs/ppo_v1"))
+        log_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../outputs/logs/ppo_custom"))
         self.writer = SummaryWriter(log_dir)
         self.training_step = 0
 
@@ -154,7 +154,7 @@ if __name__ == "__main__":
     global_time = 0.0 # Track continuous time across episodes
 
     try:
-        for episode in range(3000):
+        for episode in range(5000):
             obs, info = env.reset()
             episode_reward = 0
             done = False

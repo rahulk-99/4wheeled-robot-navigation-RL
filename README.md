@@ -3,7 +3,7 @@
 Reinforcement learning project for training a 4-wheel steering robot to navigate  and reach a random target autonomously using PPO (Proximal Policy Optimization). The robot learns smooth, efficient navigation with two training scenarios:
 
 - **Single Robot Navigation**: Navigate to randomly spawned targets
-- **Multi-Robot Collision Avoidance**: One agent learns collision avoidance using RL by observing two robots controlled by predefined P-controller policies
+- **Multi-Robot Collision Avoidance**: One agent (red) learns collision avoidance using RL by observing two robots (green) controlled by predefined P-controller policies
 
 Built with Stable-Baselines3, Gymnasium, and ROS 2 integration for mcap visualization. This project also includes a successfull [custom PPO implementation](#custom-ppo-implementation) from scratch for deeper RL insights.
 
@@ -212,11 +212,19 @@ python3 scripts/custom_ppo_singlerobot/train_custom.py --cpu
 **Options:**
 - `--cpu`: Force CPU-only training (by default, GPU is used if available)
 
+**Training Curves:**
+![Custom PPO Training Curves](docs/custom_training_curves.png)
+
+*To monitor these curves and other training parameters, refer to [TensorBoard](#monitoring-training) logs.*
 
 **Play/Inference:**
 ```bash
 python3 scripts/custom_ppo_singlerobot/play_custom.py --model outputs/models/trained_policy_custom.pth --episodes 3
 ```
 
+**Demo:**
+![Custom PPO Demo](docs/custom_PPO.gif)
+
 **Results:**
+Using Stablebasline gives better result in terms of network training and policy effectiveness.
 
