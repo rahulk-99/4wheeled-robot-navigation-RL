@@ -17,6 +17,9 @@ Built with Stable-Baselines3, Gymnasium, and ROS 2 integration for mcap visualiz
   - [Multi-Robot Collision Avoidance](#multi-robot-collision-avoidance)
 - [Monitoring Training](#monitoring-training)
 - [RL Implementation Details](#rl-implementation-details)
+  - [Observation and Action Spaces](#observation-and-action-spaces)
+  - [Reward Function](#reward-function)
+  - [Kinematics Model](#kinematics-model)
 - [Custom PPO Implementation](#custom-ppo-implementation)
 
 ### Demo
