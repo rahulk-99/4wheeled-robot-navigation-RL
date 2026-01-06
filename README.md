@@ -141,7 +141,7 @@ python3 scripts/multirobot_RL/train.py --cpu --timesteps 500000
 - `--timesteps`: Number of training steps (default: 500000)
 
 **Training Visualization:**
-![Multi-Robot Training Animation](docs/multirobot_train.gif)
+![Multi-Robot Training Animation](docs/Multirobot_train.gif)
 
 **Training Curves:**
 ![Multi-Robot Training Curves](docs/training_curves_multirobot.png)
