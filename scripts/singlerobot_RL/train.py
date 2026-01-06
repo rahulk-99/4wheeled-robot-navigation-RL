@@ -22,7 +22,9 @@ class VisualizationCallback(BaseCallback):
         self.record_freq = record_freq
         self.episode_count = 0
         self.global_time = 0.0
-        self.should_record = False
+        # Start recording immediately for the first episode
+        self.should_record = True
+        print(f"Recording episode {self.episode_count + 1} to MCAP...")
         
     def _on_step(self) -> bool:
         # Check if episode just started
@@ -80,7 +82,7 @@ if __name__ == "__main__":
     print(f"Using device: {device}")
     
     # Configure TensorBoard logging
-    log_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../outputs/logs/ppo_sb3"))
+    log_dir = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../outputs/logs/ppo_sb3"))
     new_logger = configure(log_dir, ["stdout", "tensorboard"])
     
     # Create PPO model with custom hyperparameters
@@ -130,7 +132,7 @@ if __name__ == "__main__":
         viz.close()
         
         # Save the model
-        model_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../outputs/models/trained_policy_sb3.zip"))
+        model_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../outputs/models/trained_policy_sb3.zip"))
         model.save(model_path)
         print(f"Model saved to: {model_path}")
         print("Training Complete (or Interrupted).")

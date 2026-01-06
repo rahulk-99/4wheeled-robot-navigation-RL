@@ -1,12 +1,125 @@
 import math
 import time
+import os
 # mcap library
 from mcap.writer import Writer
 # standard ROS 2 serialization
 from rclpy.serialization import serialize_message
 from visualization_msgs.msg import Marker, MarkerArray
-from geometry_msgs.msg import Point
+from geometry_msgs.msg import Point, TransformStamped
+from nav_msgs.msg import Odometry
+from tf2_msgs.msg import TFMessage
 import numpy as np
+
+def get_ros_msg_definition(msg_type):
+    """
+    Building a full 'ros2msg' definition.
+    Format:
+    <MainMsgDef>
+    MSG: <Dep1Type>
+    <Dep1Def>
+    ...
+    """
+    
+    # Cache to avoid re-reading files
+    seen_deps = set()
+    definitions = []
+    
+    # Queue of msg_name to process. msg_type example "visualization_msgs/msg/MarkerArray"
+    parts = msg_type.split('/')
+    if len(parts) == 3:
+        pkg, _, name = parts
+    elif len(parts) == 2: # sometimes referred as pkg/Msg
+        pkg, name = parts
+    else:
+        return b""
+        
+    queue = [(pkg, name)]
+    
+    # Function to find .msg file
+    def find_msg_file(package, msg_name):
+        base_paths = ["/opt/ros/humble/share", "/opt/ros/foxy/share", "/usr/share"]
+        if "AMENT_PREFIX_PATH" in os.environ:
+             base_paths = os.environ["AMENT_PREFIX_PATH"].split(":") + base_paths
+             
+        for base in base_paths:
+            path = os.path.join(base, package, "msg", f"{msg_name}.msg")
+            if os.path.exists(path):
+                return path
+        return None
+
+    main_def = ""
+    
+    while queue:
+        curr_pkg, curr_name = queue.pop(0)
+        
+        # Unique key
+        key = (curr_pkg, curr_name)
+        if key in seen_deps and key != (pkg, name):
+            continue
+        seen_deps.add(key)
+        
+        path = find_msg_file(curr_pkg, curr_name)
+        if not path:
+            print(f"Warning: Could not find definition for {curr_pkg}/{curr_name}")
+            continue
+            
+        with open(path, 'r') as f:
+            content = f.read()
+            
+        # For the main message, appending content.
+        # For dependencies, we prepend "MSG: pkg/Msg\n" (standard ros2msg format)
+        if key == (pkg, name):
+            main_def = content
+        else:
+            definitions.append(f"MSG: {curr_pkg}/{curr_name}\n{content}")
+            
+        # Parse for dependencies to add to queue
+        for line in content.splitlines():
+            line = line.strip()
+            if not line or line.startswith('#'):
+                continue
+            
+            # Simple parser: type field
+            parts = line.split()
+            if not parts: continue
+            typ = parts[0]
+            
+            # Remove array brackets []
+            if '[' in typ:
+                typ = typ.split('[')[0]
+                
+            # Check primitives in ROS2 (designator)
+            primitives = ['bool', 'byte', 'char', 'float32', 'float64', 'int8', 'uint8', 
+                          'int16', 'uint16', 'int32', 'uint32', 'int64', 'uint64', 'string', 'wstring']
+            
+            if typ in primitives:
+                continue
+                
+            # It's a complex type
+            if '/' in typ:
+                dep_pkg, dep_name = typ.split('/')
+            else:
+                dep_pkg = curr_pkg
+                dep_name = typ
+                # Handle special case: Header is usually std_msgs/Header
+                if typ == 'Header':
+                    dep_pkg = 'std_msgs'
+                    dep_name = 'Header'
+            
+            # Enqueue
+            if (dep_pkg, dep_name) not in seen_deps:
+                queue.append((dep_pkg, dep_name))
+
+    # Combine
+    full_text = main_def.strip()
+    separator = "=" * 80
+    
+    for dep_def in definitions:
+        full_text += f"\n{separator}\n{dep_def.strip()}"
+        
+    return full_text.encode('utf-8')
+
 
 class McapVisualizer:
     def __init__(self, filename="simulation.mcap", L=0.5, W=0.3, wheel_radius=0.1):
@@ -20,19 +133,40 @@ class McapVisualizer:
         self.writer = Writer(self.file)
         self.writer.start()
         
-        # 2. Register MCAP MarkerArrays
-        self.schema_id = self.writer.register_schema(
-            name="visualization_msgs/msg/MarkerArray",
-            encoding="ros2msg",
-            data=b"" 
+        # 2. Register Schemas with ros2msg definitions
+        self.marker_schema_id = self.writer.register_schema(
+            name="visualization_msgs/msg/MarkerArray", 
+            encoding="ros2msg", 
+            data=get_ros_msg_definition("visualization_msgs/msg/MarkerArray")
+        )
+        self.odom_schema_id = self.writer.register_schema(
+            name="nav_msgs/msg/Odometry", 
+            encoding="ros2msg", 
+            data=get_ros_msg_definition("nav_msgs/msg/Odometry")
+        )
+        self.tf_schema_id = self.writer.register_schema(
+            name="tf2_msgs/msg/TFMessage", 
+            encoding="ros2msg", 
+            data=get_ros_msg_definition("tf2_msgs/msg/TFMessage")
         )
         
-        # 3. Register Channel - Topic name
-        self.channel_id = self.writer.register_channel(
-            schema_id=self.schema_id,
+        # 3. Register Channels
+        # Marker channel
+        self.marker_channel_id = self.writer.register_channel(
+            schema_id=self.marker_schema_id,
             topic="/visualization",
             message_encoding="cdr"
         )
+        
+        # TF channel
+        self.tf_channel_id = self.writer.register_channel(
+            schema_id=self.tf_schema_id,
+            topic="/tf",
+            message_encoding="cdr"
+        )
+        
+        # Dictionary to store odom channel IDs per robot
+        self.odom_channels = {}
         
         print(f"Visualization started. Output: {self.filename}")
 
@@ -40,6 +174,16 @@ class McapVisualizer:
         self.writer.finish()
         self.file.close()
         print(f"Visualization saved to {self.filename}")
+
+    def get_odom_channel(self, robot_id):
+        if robot_id not in self.odom_channels:
+            topic = f"/robot{robot_id}/odom"
+            self.odom_channels[robot_id] = self.writer.register_channel(
+                schema_id=self.odom_schema_id,
+                topic=topic,
+                message_encoding="cdr"
+            )
+        return self.odom_channels[robot_id]
 
     def log_frame(self, t_nanos, robot_state, target_pos, wheel_angles, robot_id=1):
         """
@@ -56,6 +200,7 @@ class McapVisualizer:
         }
         body_color = colors.get(robot_id, (0.5, 0.5, 0.5))
         
+        # Marker Array (Visualization)
         marker_array = MarkerArray()
         
         # ROBOT BODY
@@ -161,9 +306,54 @@ class McapVisualizer:
         
         # 2. Write bytes to MCAP
         self.writer.add_message(
-            channel_id=self.channel_id,
+            channel_id=self.marker_channel_id,
             log_time=t_nanos,
             data=serialized_data,
+            publish_time=t_nanos
+        )
+
+        # 2. TF & Odometry 
+        # Frame names
+        map_frame = "map"
+        base_frame = f"robot{robot_id}_base_link"
+        
+        # Create TF Map -> Base Link
+        tf_msg = TFMessage()
+        ts = TransformStamped()
+        ts.header.frame_id = map_frame
+        ts.header.stamp = body.header.stamp
+        ts.child_frame_id = base_frame
+        ts.transform.translation.x = rx
+        ts.transform.translation.y = ry
+        ts.transform.translation.z = 0.0
+        ts.transform.rotation = body.pose.orientation # Reuse quaternion from marker
+        tf_msg.transforms.append(ts)
+        
+        self.writer.add_message(
+            channel_id=self.tf_channel_id,
+            log_time=t_nanos,
+            data=serialize_message(tf_msg),
+            publish_time=t_nanos
+        )
+        
+        # Create Odometry
+        odom = Odometry()
+        odom.header.frame_id = map_frame
+        odom.header.stamp = body.header.stamp
+        odom.child_frame_id = base_frame
+        
+        # Copy translation (Vector3) to position (Point)
+        odom.pose.pose.position.x = ts.transform.translation.x
+        odom.pose.pose.position.y = ts.transform.translation.y
+        odom.pose.pose.position.z = ts.transform.translation.z
+        
+        odom.pose.pose.orientation = ts.transform.rotation
+        
+        odom_channel_id = self.get_odom_channel(robot_id)
+        self.writer.add_message(
+            channel_id=odom_channel_id,
+            log_time=t_nanos,
+            data=serialize_message(odom),
             publish_time=t_nanos
         )
 

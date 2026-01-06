@@ -20,7 +20,8 @@ class MultiRobotVisualizationCallback(BaseCallback):
         self.record_freq = record_freq
         self.episode_count = 0
         self.global_time = 0.0
-        self.should_record = False
+        self.should_record = True
+        print(f"Recording episode {self.episode_count + 1} to MCAP...")
         
     def _on_step(self) -> bool:
         if self.locals.get('dones')[0]:
