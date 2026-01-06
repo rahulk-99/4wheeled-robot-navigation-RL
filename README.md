@@ -180,6 +180,23 @@ Then open your browser to `http://localhost:6006` to visualize all training curv
 
 ## Implementation Details
 
+### Observation and Action Spaces
+
+**Single Robot Observation** (4D):
+- Distance to target
+- Heading error to target (normalized: [-π, π])
+- Current velocity (m/s): [0, 2.0]
+- Current curvature (rad): [-1.5, 1.5]
+
+**Multi-Robot Observation** (12D):
+- Agent state: [distance, heading, velocity, curvature]
+- Robot 2 relative position and velocity: [rel_x, rel_y, vx, vy]
+- Robot 3 relative position and velocity: [rel_x, rel_y, vx, vy]
+
+**Action Space** (2D continuous):
+- Steering curvature (κ): [-1.5, 1.5] rad
+- Velocity command (v): [0.0, 2.0] m/s
+
 ### Reward Function
 The reward function is balanced to encourage smooth, efficient driving:
 *   **Progress**: Reward for moving closer to target
